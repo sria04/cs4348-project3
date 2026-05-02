@@ -38,6 +38,8 @@ See `devlog.md` for session notes.
 
 - `project3.py` — CLI entrypoint
 - `index_file.py` — block size, endianness, header, raw block read/write helpers
+- `btree_node.py` — node block layout (19 keys, 20 children), encode/decode
+- `test_btree_node.py` — unittest round-trip checks (`python3 -m unittest -v`)
 - `devlog.md` — design notes and session log
 
 ## Notes for the TA

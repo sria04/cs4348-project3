@@ -33,3 +33,18 @@
 - Second `create` on same path fails without changing the file.
 
 **Next:** Node block encode/decode (19 keys, 19 values, 20 child ids); round-trip tests; then `search` / insert path.
+
+## Session 3 — Node block encoding
+
+**Goal:** Serialize and deserialize one B-tree node into exactly 512 bytes per the assignment field order; verify with automated tests.
+
+**What changed:**
+
+- New `btree_node.py`: `MIN_DEGREE` / `MAX_KEYS` / `NUM_CHILDREN`, `Node` dataclass, `empty_node`, `encode_node_block`, `decode_node_block` (big-endian u64 via `index_file`).
+- New `test_btree_node.py`: unittest cases for empty node, partial keys, full 19-key node, and invalid `num_keys` on encode.
+
+**How tested:**
+
+- `python3 -m unittest -v` (all tests pass).
+
+**Next:** Open index + load nodes from disk with the 3-node memory limit in mind; implement `search` on an empty then single-node tree.
