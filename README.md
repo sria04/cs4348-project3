@@ -30,7 +30,7 @@ python3 project3.py create --help
 | `print`  | Print all key/value pairs to stdout           |
 | `extract`| Write all pairs to a CSV file                 |
 
-**Implemented so far:** `create`, `search`, `insert` with leaf/internal splits and root growth. Other commands are still stubs (`load`, `print`, `extract`).
+**Implemented so far:** `create`, `search`, `insert`, `print` (sorted key order), `extract` (CSV, refuses existing output), `load` (CSV bulk insert).
 
 See `devlog.md` for session notes.
 
@@ -40,7 +40,7 @@ See `devlog.md` for session notes.
 - `index_file.py` — block size, endianness, header, raw block read/write helpers
 - `btree_node.py` — node block layout (19 keys, 20 children), encode/decode
 - `btree_ops.py` — `search_key` on an open index file
-- `test_btree_node.py`, `test_btree_search.py`, `test_btree_insert.py` — unittests (`python3 -m unittest -v`)
+- `test_btree_node.py`, `test_btree_search.py`, `test_btree_insert.py`, `test_io_commands.py` — unittests (`python3 -m unittest -v`)
 - `devlog.md` — design notes and session log
 
 ## Notes for the TA

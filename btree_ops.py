@@ -209,3 +209,28 @@ def insert_key(f: BinaryIO, key: int, value: int) -> None:
         root_id, _ = index_file.read_header_from_open_file(f)
 
     _insert_non_full(f, root_id, key, value)
+
+
+def _inorder_collect(f: BinaryIO, block_id: int, out: list[tuple[int, int]]) -> None:
+    """Append all key/value pairs under this subtree in sorted key order."""
+    if block_id == 0:
+        return
+    raw = index_file.read_block(f, block_id)
+    node = btree_node.decode_node_block(raw)
+    if _is_leaf(node):
+        for i in range(node.num_keys):
+            out.append((node.keys[i], node.values[i]))
+        return
+    for i in range(node.num_keys):
+        _inorder_collect(f, node.children[i], out)
+        out.append((node.keys[i], node.values[i]))
+    _inorder_collect(f, node.children[node.num_keys], out)
+
+
+def all_pairs_inorder(f: BinaryIO) -> list[tuple[int, int]]:
+    root_id, _ = index_file.read_header_from_open_file(f)
+    if root_id == 0:
+        return []
+    out: list[tuple[int, int]] = []
+    _inorder_collect(f, root_id, out)
+    return out

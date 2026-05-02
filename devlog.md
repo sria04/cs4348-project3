@@ -98,3 +98,24 @@
 - `python3 -m unittest -v`
 
 **Next:** In-order traversal for `print` / `extract`; CSV `load`.
+
+## Session 7 — `print`, `extract`, `load`
+
+**Goal:** In-order walk of the B-tree for sorted output; `extract` writes `key,value` lines and must not overwrite; `load` parses CSV and reuses `insert_key`.
+
+**What changed:**
+
+- `btree_ops.all_pairs_inorder` / `_inorder_collect` (recursive in-order: child\(_i\), key\(_i\), …, last child).
+- `project3.py`: `_cmd_print`, `_cmd_extract`, `_cmd_load` (strip lines, skip blanks, two comma-separated fields per row).
+- `test_io_commands.py`: in-order list vs hand-built tree; subprocess tests for print order, extract→load roundtrip, extract clobber error, missing CSV.
+
+**How tested:**
+
+- `python3 -m unittest -v` — full suite (19 tests), including:
+  - **`TestAllPairsInorder`:** build a 3-node index on disk (internal + two leaves), assert `all_pairs_inorder` returns `[(10,10), (50,500), (60,60)]`.
+  - **`test_print_sorted_and_empty`:** subprocess `create` → empty `print` (no stdout) → three `insert`s out of order → `print` must emit keys sorted.
+  - **`test_extract_and_load_roundtrip`:** `extract` to CSV, assert file contents are two lines `1,10` and `5,50`; new index + `load` from that file → `print` matches.
+  - **`test_extract_refuses_existing_output`:** pre-create output path → `extract` fails → file contents unchanged.
+  - **`test_load_missing_csv`:** `load` with nonexistent CSV exits non-zero.
+
+**Next:** Final error-pass / README polish if needed; TA notes.

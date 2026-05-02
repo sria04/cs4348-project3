@@ -4,6 +4,7 @@
 from __future__ import annotations
 
 import argparse
+import os
 import sys
 
 import btree_ops
@@ -75,6 +76,87 @@ def _cmd_insert(path: str, key_text: str, value_text: str) -> int:
     return 0
 
 
+def _cmd_print(path: str) -> int:
+    if not index_file.is_valid_index_file(path):
+        print("Error: invalid or missing index file", file=sys.stderr)
+        return 1
+    try:
+        with open(path, "rb") as f:
+            pairs = btree_ops.all_pairs_inorder(f)
+    except OSError as e:
+        print(f"Error: could not read index: {e}", file=sys.stderr)
+        return 1
+    for k, v in pairs:
+        print(f"{k} {v}")
+    return 0
+
+
+def _cmd_extract(index_path: str, out_path: str) -> int:
+    if not index_file.is_valid_index_file(index_path):
+        print("Error: invalid or missing index file", file=sys.stderr)
+        return 1
+    if os.path.exists(out_path):
+        print(f"Error: output file already exists: {out_path}", file=sys.stderr)
+        return 1
+    try:
+        with open(index_path, "rb") as f:
+            pairs = btree_ops.all_pairs_inorder(f)
+        with open(out_path, "w", encoding="ascii", newline="\n") as out:
+            for k, v in pairs:
+                out.write(f"{k},{v}\n")
+    except OSError as e:
+        print(f"Error: could not write extract: {e}", file=sys.stderr)
+        return 1
+    return 0
+
+
+def _cmd_load(index_path: str, csv_path: str) -> int:
+    if not index_file.is_valid_index_file(index_path):
+        print("Error: invalid or missing index file", file=sys.stderr)
+        return 1
+    if not os.path.isfile(csv_path):
+        print(f"Error: CSV file not found: {csv_path}", file=sys.stderr)
+        return 1
+    try:
+        with open(csv_path, encoding="utf-8") as csvf:
+            lines = csvf.readlines()
+    except OSError as e:
+        print(f"Error: could not read CSV: {e}", file=sys.stderr)
+        return 1
+
+    rows: list[tuple[int, int]] = []
+    for lineno, line in enumerate(lines, start=1):
+        s = line.strip()
+        if not s:
+            continue
+        parts = s.split(",")
+        if len(parts) != 2:
+            print(f"Error: bad CSV line {lineno}: expected key,value", file=sys.stderr)
+            return 1
+        try:
+            k = index_file.parse_uint64_key(parts[0].strip())
+            v = index_file.parse_uint64_key(parts[1].strip())
+        except ValueError as e:
+            print(f"Error: bad number on line {lineno}: {e}", file=sys.stderr)
+            return 1
+        rows.append((k, v))
+
+    try:
+        with open(index_path, "r+b") as f:
+            for k, v in rows:
+                btree_ops.insert_key(f, k, v)
+    except btree_ops.DuplicateKeyError:
+        print("Error: duplicate key", file=sys.stderr)
+        return 1
+    except btree_ops.LeafFullError:
+        print("Error: leaf is full", file=sys.stderr)
+        return 1
+    except (OSError, ValueError) as e:
+        print(f"Error: could not update index: {e}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="project3",
@@ -114,6 +196,12 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_search(args.index_file, args.key)
     if cmd == "insert":
         return _cmd_insert(args.index_file, args.key, args.value)
+    if cmd == "print":
+        return _cmd_print(args.index_file)
+    if cmd == "extract":
+        return _cmd_extract(args.index_file, args.output_file)
+    if cmd == "load":
+        return _cmd_load(args.index_file, args.csv_file)
     return _stub(cmd)
 
 
