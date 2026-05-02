@@ -50,6 +50,31 @@ def _cmd_search(path: str, key_text: str) -> int:
     return 0
 
 
+def _cmd_insert(path: str, key_text: str, value_text: str) -> int:
+    if not index_file.is_valid_index_file(path):
+        print("Error: invalid or missing index file", file=sys.stderr)
+        return 1
+    try:
+        key = index_file.parse_uint64_key(key_text)
+        value = index_file.parse_uint64_key(value_text)
+    except ValueError as e:
+        print(f"Error: bad key or value: {e}", file=sys.stderr)
+        return 1
+    try:
+        with open(path, "r+b") as f:
+            btree_ops.insert_key(f, key, value)
+    except btree_ops.DuplicateKeyError:
+        print("Error: duplicate key", file=sys.stderr)
+        return 1
+    except btree_ops.LeafFullError:
+        print("Error: leaf is full", file=sys.stderr)
+        return 1
+    except (OSError, ValueError) as e:
+        print(f"Error: could not update index: {e}", file=sys.stderr)
+        return 1
+    return 0
+
+
 def main(argv: list[str] | None = None) -> int:
     parser = argparse.ArgumentParser(
         prog="project3",
@@ -87,6 +112,8 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_create(args.index_file)
     if cmd == "search":
         return _cmd_search(args.index_file, args.key)
+    if cmd == "insert":
+        return _cmd_insert(args.index_file, args.key, args.value)
     return _stub(cmd)
 
 

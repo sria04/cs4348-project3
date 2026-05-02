@@ -65,3 +65,20 @@
 - `python3 -m unittest -v`
 
 **Next:** `insert` into leaf (no split), then splits and root growth; keep the same on-disk discipline.
+
+## Session 5 — `insert` (no split)
+
+**Goal:** Insert into an empty tree (first leaf + header update) or into a non-full leaf; reject duplicates and full leaves (19 keys) until splits exist.
+
+**What changed:**
+
+- `index_file.write_header` for atomic header updates on an open file.
+- `btree_ops`: `_allocate_block`, `_find_leaf_for_insert`, `_insert_sorted_into_leaf`, `insert_key`; `DuplicateKeyError` and `LeafFullError`.
+- `project3.py`: `insert` parses key/value as uint64, opens `r+b`, surfaces errors on stderr.
+- `test_btree_insert.py`: first key, multi-key leaf, duplicate, leaf full, CLI insert+search.
+
+**How tested:**
+
+- `python3 -m unittest -v`
+
+**Next:** Split full leaves and internal nodes; grow height when the root splits.

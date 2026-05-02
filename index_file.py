@@ -73,6 +73,10 @@ def read_header_from_open_file(f: BinaryIO) -> tuple[int, int]:
     return parse_header_block(read_block(f, 0))
 
 
+def write_header(f: BinaryIO, root_block_id: int, next_block_id: int) -> None:
+    write_block(f, 0, build_header_block(root_block_id, next_block_id))
+
+
 def create_index(path: str) -> None:
     if os.path.exists(path):
         raise FileExistsError(path)
