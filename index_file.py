@@ -89,10 +89,16 @@ def is_valid_index_file(path: str) -> bool:
     if not os.path.isfile(path):
         return False
     try:
+        size = os.path.getsize(path)
+        if size == 0 or size % BLOCK_SIZE != 0:
+            return False
+        num_blocks = size // BLOCK_SIZE
         with open(path, "rb") as f:
-            if os.path.getsize(path) % BLOCK_SIZE != 0:
-                return False
-            read_header_from_open_file(f)
+            root_id, next_id = read_header_from_open_file(f)
+        if next_id != num_blocks:
+            return False
+        if root_id != 0 and root_id >= next_id:
+            return False
     except (OSError, ValueError):
         return False
     return True

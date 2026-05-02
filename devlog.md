@@ -119,3 +119,20 @@
   - **`test_load_missing_csv`:** `load` with nonexistent CSV exits non-zero.
 
 **Next:** Final error-pass / README polish if needed; TA notes.
+
+## Session 8 — Validation and error handling
+
+**Goal:** Treat obviously broken files as invalid indexes before touching tree logic; surface corrupt reads clearly; drop dead CLI stub.
+
+**What changed:**
+
+- `is_valid_index_file`: require non-zero size, multiple of 512, `next_block_id == number of blocks`, and `root_id < next_block_id` when `root_id != 0`.
+- `search` / `print` / `extract`: catch `ValueError` from block reads as `Error: corrupt index file: …` (in addition to `is_valid` gate for common cases).
+- `project3.py`: removed `_stub`; unhandled subcommand is a `RuntimeError` (should not occur).
+- `test_validation.py`: bad magic, wrong size, `next_id` vs file length, bogus root; CLI smoke test on bad magic.
+
+**How tested:**
+
+- `python3 -m unittest -v` (25 tests).
+
+**Wrap-up:** All spec commands implemented; run the suite above before submission.

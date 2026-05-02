@@ -11,11 +11,6 @@ import btree_ops
 import index_file
 
 
-def _stub(command: str) -> int:
-    print(f"Command {command!r} is not implemented yet.", file=sys.stderr)
-    return 1
-
-
 def _cmd_create(path: str) -> int:
     try:
         index_file.create_index(path)
@@ -42,6 +37,9 @@ def _cmd_search(path: str, key_text: str) -> int:
             found = btree_ops.search_key(f, key)
     except OSError as e:
         print(f"Error: could not read index: {e}", file=sys.stderr)
+        return 1
+    except ValueError as e:
+        print(f"Error: corrupt index file: {e}", file=sys.stderr)
         return 1
     if found is None:
         print("Error: key not found", file=sys.stderr)
@@ -86,6 +84,9 @@ def _cmd_print(path: str) -> int:
     except OSError as e:
         print(f"Error: could not read index: {e}", file=sys.stderr)
         return 1
+    except ValueError as e:
+        print(f"Error: corrupt index file: {e}", file=sys.stderr)
+        return 1
     for k, v in pairs:
         print(f"{k} {v}")
     return 0
@@ -104,6 +105,9 @@ def _cmd_extract(index_path: str, out_path: str) -> int:
         with open(out_path, "w", encoding="ascii", newline="\n") as out:
             for k, v in pairs:
                 out.write(f"{k},{v}\n")
+    except ValueError as e:
+        print(f"Error: corrupt index file: {e}", file=sys.stderr)
+        return 1
     except OSError as e:
         print(f"Error: could not write extract: {e}", file=sys.stderr)
         return 1
@@ -202,7 +206,7 @@ def main(argv: list[str] | None = None) -> int:
         return _cmd_extract(args.index_file, args.output_file)
     if cmd == "load":
         return _cmd_load(args.index_file, args.csv_file)
-    return _stub(cmd)
+    raise RuntimeError(f"unhandled command: {cmd}")
 
 
 if __name__ == "__main__":
