@@ -16,3 +16,20 @@
 - Running a subcommand prints a clear “not implemented” message to stderr and non-zero exit (stub).
 
 **Next:** Block I/O and file header (`create` producing a valid empty index file); constants for block size, magic string, endianness.
+
+## Session 2 — Block layer and `create`
+
+**Goal:** 512-byte blocks, big-endian `uint64` fields, header layout from the spec, raw `read_block` / `write_block`, and a working `create` that refuses to clobber an existing file.
+
+**What changed:**
+
+- New `index_file.py`: `BLOCK_SIZE`, `MAGIC` (`4348PRJ3`), `pack_u64` / `unpack_u64`, `build_header_block` / `parse_header_block`, `read_block` / `write_block`, `read_header_from_open_file`, `create_index`, and `is_valid_index_file` (for later commands).
+- Empty index: root block id `0`, next block id `1` (block `0` is header only).
+- `project3.py`: `create` calls `create_index`; duplicate path → error message on stderr, exit `1`.
+
+**How tested:**
+
+- `python3 project3.py create new.idx` then file size is `512` bytes; first 8 bytes are ASCII `4348PRJ3`; parsed header gives root `0`, next `1`.
+- Second `create` on same path fails without changing the file.
+
+**Next:** Node block encode/decode (19 keys, 19 values, 20 child ids); round-trip tests; then `search` / insert path.

@@ -30,11 +30,14 @@ python3 project3.py create --help
 | `print`  | Print all key/value pairs to stdout           |
 | `extract`| Write all pairs to a CSV file                 |
 
-Implementation is in progress; see `devlog.md`.
+**Implemented so far:** `create` writes a new 512-byte header (empty tree). Other commands are still stubs.
+
+See `devlog.md` for session notes.
 
 ## Files
 
-- `project3.py` — main program
+- `project3.py` — CLI entrypoint
+- `index_file.py` — block size, endianness, header, raw block read/write helpers
 - `devlog.md` — design notes and session log
 
 ## Notes for the TA

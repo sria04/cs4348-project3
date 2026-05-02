@@ -6,10 +6,24 @@ from __future__ import annotations
 import argparse
 import sys
 
+import index_file
+
 
 def _stub(command: str) -> int:
     print(f"Command {command!r} is not implemented yet.", file=sys.stderr)
     return 1
+
+
+def _cmd_create(path: str) -> int:
+    try:
+        index_file.create_index(path)
+    except FileExistsError:
+        print(f"Error: file already exists: {path}", file=sys.stderr)
+        return 1
+    except OSError as e:
+        print(f"Error: could not create index: {e}", file=sys.stderr)
+        return 1
+    return 0
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -45,6 +59,8 @@ def main(argv: list[str] | None = None) -> int:
     args = parser.parse_args(argv)
     cmd = args.command
     assert cmd is not None
+    if cmd == "create":
+        return _cmd_create(args.index_file)
     return _stub(cmd)
 
 
