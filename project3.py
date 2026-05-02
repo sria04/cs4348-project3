@@ -6,6 +6,7 @@ from __future__ import annotations
 import argparse
 import sys
 
+import btree_ops
 import index_file
 
 
@@ -23,6 +24,29 @@ def _cmd_create(path: str) -> int:
     except OSError as e:
         print(f"Error: could not create index: {e}", file=sys.stderr)
         return 1
+    return 0
+
+
+def _cmd_search(path: str, key_text: str) -> int:
+    if not index_file.is_valid_index_file(path):
+        print("Error: invalid or missing index file", file=sys.stderr)
+        return 1
+    try:
+        key = index_file.parse_uint64_key(key_text)
+    except ValueError as e:
+        print(f"Error: bad key: {e}", file=sys.stderr)
+        return 1
+    try:
+        with open(path, "rb") as f:
+            found = btree_ops.search_key(f, key)
+    except OSError as e:
+        print(f"Error: could not read index: {e}", file=sys.stderr)
+        return 1
+    if found is None:
+        print("Error: key not found", file=sys.stderr)
+        return 1
+    k, v = found
+    print(f"{k} {v}")
     return 0
 
 
@@ -61,6 +85,8 @@ def main(argv: list[str] | None = None) -> int:
     assert cmd is not None
     if cmd == "create":
         return _cmd_create(args.index_file)
+    if cmd == "search":
+        return _cmd_search(args.index_file, args.key)
     return _stub(cmd)
 
 

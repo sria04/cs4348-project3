@@ -48,3 +48,20 @@
 - `python3 -m unittest -v` (all tests pass).
 
 **Next:** Open index + load nodes from disk with the 3-node memory limit in mind; implement `search` on an empty then single-node tree.
+
+## Session 4 — `search`
+
+**Goal:** B-tree lookup from the root block id in the header; validate index path; print `key value` on success; sensible errors for bad file, bad key text, or missing key.
+
+**What changed:**
+
+- `index_file.parse_uint64_key` for decimal uint64 CLI arguments.
+- `btree_ops.search_key`: standard B-tree descent; leaf = all child ids zero; only one node is decoded at a time (previous block discarded each step), under the assignment’s 3-node cap.
+- `project3.py`: `search` subcommand wired to the above.
+- `test_btree_search.py`: empty index, single-leaf root, internal+two-leaves fixture, plus a subprocess smoke test on an empty tree.
+
+**How tested:**
+
+- `python3 -m unittest -v`
+
+**Next:** `insert` into leaf (no split), then splits and root growth; keep the same on-disk discipline.

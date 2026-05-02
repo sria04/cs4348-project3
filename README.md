@@ -30,7 +30,7 @@ python3 project3.py create --help
 | `print`  | Print all key/value pairs to stdout           |
 | `extract`| Write all pairs to a CSV file                 |
 
-**Implemented so far:** `create` writes a new 512-byte header (empty tree). Other commands are still stubs.
+**Implemented so far:** `create` (empty index), `search` (walk tree from disk; one decoded node at a time). Other commands are still stubs.
 
 See `devlog.md` for session notes.
 
@@ -39,7 +39,8 @@ See `devlog.md` for session notes.
 - `project3.py` — CLI entrypoint
 - `index_file.py` — block size, endianness, header, raw block read/write helpers
 - `btree_node.py` — node block layout (19 keys, 20 children), encode/decode
-- `test_btree_node.py` — unittest round-trip checks (`python3 -m unittest -v`)
+- `btree_ops.py` — `search_key` on an open index file
+- `test_btree_node.py`, `test_btree_search.py` — unittests (`python3 -m unittest -v`)
 - `devlog.md` — design notes and session log
 
 ## Notes for the TA

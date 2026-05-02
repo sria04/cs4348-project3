@@ -21,6 +21,20 @@ def unpack_u64(data: bytes) -> int:
     return int.from_bytes(data[:UINT64_SIZE], "big", signed=False)
 
 
+UINT64_MAX = 2**64 - 1
+
+
+def parse_uint64_key(s: str) -> int:
+    """Parse a non-negative decimal integer that fits in 64 bits (insert/search/load)."""
+    t = s.strip()
+    if not t or t[0] == "-":
+        raise ValueError("integer must be non-negative")
+    n = int(t, 10)
+    if n < 0 or n > UINT64_MAX:
+        raise ValueError("integer out of uint64 range")
+    return n
+
+
 def build_header_block(root_block_id: int, next_block_id: int) -> bytes:
     buf = bytearray(BLOCK_SIZE)
     buf[0:HEADER_MAGIC_END] = MAGIC
