@@ -30,7 +30,7 @@ python3 project3.py create --help
 | `print`  | Print all key/value pairs to stdout           |
 | `extract`| Write all pairs to a CSV file                 |
 
-**Implemented so far:** `create`, `search`, `insert` when the target leaf has fewer than 19 keys (no node splits yet). Other commands are still stubs.
+**Implemented so far:** `create`, `search`, `insert` with leaf/internal splits and root growth. Other commands are still stubs (`load`, `print`, `extract`).
 
 See `devlog.md` for session notes.
 

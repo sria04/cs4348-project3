@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import os
+import random
 import subprocess
 import sys
 import tempfile
@@ -44,15 +45,34 @@ class TestInsertNoSplit(unittest.TestCase):
                 with self.assertRaises(btree_ops.DuplicateKeyError):
                     btree_ops.insert_key(f, 1, 99)
 
-    def test_leaf_full_raises(self) -> None:
+    def test_many_inserts_split(self) -> None:
         with tempfile.TemporaryDirectory() as d:
             path = os.path.join(d, "d.idx")
             index_file.create_index(path)
+            n = 250
             with open(path, "r+b") as f:
-                for i in range(btree_node.MAX_KEYS):
-                    btree_ops.insert_key(f, i, i * 10)
-                with self.assertRaises(btree_ops.LeafFullError):
-                    btree_ops.insert_key(f, 999, 1)
+                for i in range(n):
+                    btree_ops.insert_key(f, i, i * 10 + 7)
+            with open(path, "rb") as f:
+                for i in range(n):
+                    self.assertEqual(
+                        btree_ops.search_key(f, i),
+                        (i, i * 10 + 7),
+                    )
+
+    def test_many_inserts_random_order(self) -> None:
+        with tempfile.TemporaryDirectory() as d:
+            path = os.path.join(d, "e.idx")
+            index_file.create_index(path)
+            keys = list(range(80))
+            rnd = random.Random(42)
+            rnd.shuffle(keys)
+            with open(path, "r+b") as f:
+                for k in keys:
+                    btree_ops.insert_key(f, k, k * 3)
+            with open(path, "rb") as f:
+                for k in keys:
+                    self.assertEqual(btree_ops.search_key(f, k), (k, k * 3))
 
 
 class TestInsertCLI(unittest.TestCase):

@@ -73,7 +73,7 @@
 **What changed:**
 
 - `index_file.write_header` for atomic header updates on an open file.
-- `btree_ops`: `_allocate_block`, `_find_leaf_for_insert`, `_insert_sorted_into_leaf`, `insert_key`; `DuplicateKeyError` and `LeafFullError`.
+- `btree_ops`: `_allocate_block`, `_find_leaf_for_insert`, `_insert_sorted_into_leaf`, `insert_key`; `DuplicateKeyError` and `LeafFullError`. (Session 6 replaces the insert path with `_insert_non_full` / `_split_child` and drops `_find_leaf_for_insert`.)
 - `project3.py`: `insert` parses key/value as uint64, opens `r+b`, surfaces errors on stderr.
 - `test_btree_insert.py`: first key, multi-key leaf, duplicate, leaf full, CLI insert+search.
 
@@ -82,3 +82,19 @@
 - `python3 -m unittest -v`
 
 **Next:** Split full leaves and internal nodes; grow height when the root splits.
+
+## Session 6 — Splits and full `insert`
+
+**Goal:** CLRS-style B-tree insert: split full children on the way down, split a full root by introducing a new empty parent, redistribute keys/children with middle key promoted; keep `parent_id` updated for moved internal children.
+
+**What changed:**
+
+- `btree_ops._split_child`, `_insert_non_full`, `_set_parent`; `insert_key` handles empty tree, full-root split, then recursive insert.
+- Split parameters: `t = 10`, promote key at index `t - 1`, left/right leaves (or internals) each hold `t - 1` keys.
+- `test_btree_insert`: replaced “leaf full” expectation with `test_many_inserts_split` (250 keys) and `test_many_inserts_random_order`.
+
+**How tested:**
+
+- `python3 -m unittest -v`
+
+**Next:** In-order traversal for `print` / `extract`; CSV `load`.
